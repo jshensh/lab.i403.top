@@ -141,8 +141,6 @@
 
     <script type="text/javascript">
         var calcStamp = function(all, factor, deviation) {
-            deviation = parseFloat(deviation) || 0.01;
-
             var tmpSort = Object.entries(factor).sort(function(a, b) {
                 return b[1] - a[1];
             });
@@ -179,7 +177,7 @@
                         }
                         continue;
                     }
-                    if (Math.abs(tmpSum + x * currentFactor[0] - all) <= deviation) {
+                    if (Math.round(Math.abs(tmpSum + x * currentFactor[0] - all) * 100) / 100 <= deviation) {
                         var tmpParentQty = {};
                         Object.assign(tmpParentQty, parentQty);
                         tmpParentQty[currentFactor[0]] = x;
@@ -358,7 +356,7 @@
 
                 var options = {
                     'factor': formDom.serializeObject(),
-                    'deviation': deviationDom.val()
+                    'deviation': parseFloat(deviationDom.val())
                 };
 
                 // 校验所有分配比例拖动条相加是否被弱智用户设为小于 100%
@@ -370,7 +368,7 @@
 
                 $('#calcAlert').hide();
 
-                var arr = calcStamp(amountDom.val(), options['factor'], options['deviation']);
+                var arr = calcStamp(parseFloat(amountDom.val()), options['factor'], options['deviation']);
 
                 if (!arr.length) {
                     $('#calcAlert').html('无法计算结果，请适当调整分配比例拖动条，或调大误差金额')
