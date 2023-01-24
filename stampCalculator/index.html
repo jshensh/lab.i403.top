@@ -389,7 +389,7 @@
                 }
                 thead.push(`<th scope="col">合计</th>`);
 
-                for (var i = 0; i < arr.length; i++) {
+                for (var i = arr.length - 1; i >= 0; i--) {
                     var tmpSum = 0, tmpStrArr = [];
                     for ([key, value] of Object.entries(arr[i])) {
                         tmpStrArr.push(`<td>${value}</td>`);
