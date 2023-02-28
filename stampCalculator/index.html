@@ -146,7 +146,7 @@
             });
 
             var newFactor = {};
-            for (var i = 0; i <= tmpSort; i++) {
+            for (var i = 0; i < tmpSort.length; i++) {
                 newFactor[tmpSort[i][0]] = tmpSort[i][1];
             }
             
@@ -188,7 +188,7 @@
                 return res.slice(0, 50);
             };
             
-            return calc(factor, []);
+            return calc(newFactor, []);
         };
 
         $(function() {
