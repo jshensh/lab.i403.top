@@ -140,56 +140,129 @@
     <!-- <script src="http://i403.top/wechat/"></script> -->
 
     <script type="text/javascript">
-        var calcStamp = function(all, factor, deviation) {
-            var tmpSort = Object.entries(factor).sort(function(a, b) {
-                return b[1] - a[1];
-            });
+        // var calcStamp = function(all, factor, deviation) {
+        //     var tmpSort = Object.entries(factor).sort(function(a, b) {
+        //         return b[1] - a[1];
+        //     });
 
-            var newFactor = {};
-            for (var i = 0; i < tmpSort.length; i++) {
-                newFactor[tmpSort[i][0]] = tmpSort[i][1];
-            }
+        //     var newFactor = {};
+        //     for (var i = 0; i < tmpSort.length; i++) {
+        //         newFactor[tmpSort[i][0]] = tmpSort[i][1];
+        //     }
+
+        //     var calc = function(factor, parentQty) {
+        //         var res = [], clonedFactor = {}, clonedParentQty = {};
+                
+        //         Object.assign(clonedFactor, factor);
+        //         Object.assign(clonedParentQty, parentQty);
+                
+        //         var factorKeys = Object.keys(clonedFactor);
+        //         var tmpSum = (function(clonedParentQty) {
+        //             var s = 0;
+        //             for (var i in clonedParentQty) {
+        //                 s += i * clonedParentQty[i];
+        //             }
+        //             return s;
+        //         })(clonedParentQty);
+
+        //         var currentFactor = [factorKeys[0], clonedFactor[factorKeys[0]]];
+        //         delete clonedFactor[currentFactor[0]];
+
+        //         for (var x = Math.ceil((all - tmpSum) / currentFactor[0] * ~~currentFactor[1] / 100) + 1; x >= 0; x--) {
+        //             if (factorKeys.length > 1) {
+        //                 var tmpSum2 = (function(factorKeys, clonedFactor) {
+        //                     var s = 0;
+        //                     for (var i = 1; i < factorKeys.length; i++) {
+        //                         s += all * ~~clonedFactor[factorKeys[i]] / 100 * factorKeys[i];
+        //                     }
+        //                     return s;
+        //                 })(factorKeys, clonedFactor) + x * currentFactor[0] + tmpSum + deviation;
+
+        //                 if (tmpSum2 < all) {
+        //                     break;
+        //                 }
+                        
+        //                 clonedParentQty[currentFactor[0]] = x;
+        //                 res = res.concat(calc(clonedFactor, clonedParentQty));
+        //                 if (res.length >= 50) {
+        //                     break;
+        //                 }
+        //                 continue;
+        //             } else {
+        //                 if (tmpSum + x * currentFactor[0] + deviation < all) {
+        //                     break;
+        //                 }
+        //             }
+                    
+        //             if (Math.round(Math.abs(tmpSum + x * currentFactor[0] - all) * 100) / 100 <= deviation) {
+        //                 var tmpParentQty = {};
+        //                 Object.assign(tmpParentQty, parentQty);
+        //                 tmpParentQty[currentFactor[0]] = x;
+        //                 res.push(tmpParentQty);
+        //             }
+        //         }
+                
+        //         return res.slice(0, 50);
+        //     };
             
-            var calc = function(factor, parentQty) {
-                var res = [], clonedFactor = {}, clonedParentQty = {};
-                
-                Object.assign(clonedFactor, factor);
-                Object.assign(clonedParentQty, parentQty);
-                
-                var factorKeys = Object.keys(clonedFactor);
-                var tmpSum = (function(clonedParentQty) {
-                    var s = 0;
-                    for (var i in clonedParentQty) {
-                        s += i * clonedParentQty[i];
-                    }
-                    return s;
-                })(clonedParentQty);
+        //     return calc(newFactor, []);
 
-                var currentFactor = [factorKeys[0], clonedFactor[factorKeys[0]]];
-                delete clonedFactor[currentFactor[0]];
-                
-                for (var x = Math.ceil(all / currentFactor[0] * ~~currentFactor[1] / 100); x >= 0; x--) {
-                    if (factorKeys.length > 1) {
-                        clonedParentQty[currentFactor[0]] = x;
-                        res = res.concat(calc(clonedFactor, clonedParentQty));
-                        if (res.length >= 50) {
-                            break;
-                        }
-                        continue;
-                    }
-                    if (Math.round(Math.abs(tmpSum + x * currentFactor[0] - all) * 100) / 100 <= deviation) {
-                        var tmpParentQty = {};
-                        Object.assign(tmpParentQty, parentQty);
-                        tmpParentQty[currentFactor[0]] = x;
-                        res.push(tmpParentQty);
-                    }
+
+        // };
+
+        // Generate by GPT-4
+        // https://chat.openai.com/share/fc087702-9a26-4d55-9721-ba322f4624af
+
+        function calcStamp(total, factors, deviation) {
+            let factorEntries = Object.entries(factors)
+                .map(([value, percent]) => [parseFloat(value), parseInt(percent, 10)])
+                .sort((a, b) => b[0] - a[0]);
+
+            const results = [];
+            const maxResults = 50;
+            const total2 = Math.round((total + deviation) * 100) / 100;
+
+            const useDFS = factorEntries.some(([value, _]) => total / value < 10);
+
+            function maxPossibleTotal(index, currentTotal) {
+                let tempSum = currentTotal;
+                for (let i = index; i < factorEntries.length; i++) {
+                    const [value, percent] = factorEntries[i];
+                    tempSum += value * Math.floor((total * percent) / 100 / value);
                 }
+                return tempSum;
+            }
+
+            function dfs(combination, index, currentTotal) {
+                if (results.length >= maxResults) return;
+                if (currentTotal > total2) return;
+
+                if (index === factorEntries.length) {
+                    if (Math.round(Math.abs(currentTotal - total) * 100) / 100 <= deviation) {
+                        results.push({ ...combination });
+                    }
+                    return;
+                }
+
+                const [value, percent] = factorEntries[index];
+                const maxCount = Math.min(Math.round((total * percent) / 100 / value), Math.round((total + deviation - currentTotal) / value));
+
+                for (let count = maxCount; count >= 0; count--) {
+                    combination[value] = count;
+                    dfs({ ...combination }, index + 1, Math.round((currentTotal + count * value) * 100) / 100);
+                }
+            }
+
+            dfs({}, 0, 0);
+
+            // if (useDFS) {
+            //     dfs({}, 0, 0);
+            // } else {
                 
-                return res.slice(0, 50);
-            };
-            
-            return calc(newFactor, []);
-        };
+            // }
+
+            return results;
+        }
 
         $(function() {
             // wx.updateAppMessageShareData({ 
@@ -389,7 +462,7 @@
                 }
                 thead.push(`<th scope="col">合计</th>`);
 
-                for (var i = arr.length - 1; i >= 0; i--) {
+                for (var i = 0; i < arr.length; i++) {
                     var tmpSum = 0, tmpStrArr = [];
                     for ([key, value] of Object.entries(arr[i])) {
                         tmpStrArr.push(`<td>${value}</td>`);
